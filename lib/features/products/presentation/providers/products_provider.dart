@@ -3,17 +3,20 @@ import '../../domain/entities/product_entity.dart';
 import '../../domain/usecases/get_products.dart';
 import '../../domain/usecases/add_product.dart';
 import '../../domain/usecases/delete_product.dart';
+import '../../../../core/services/favorites_service.dart';
 
 
 class ProductsProvider extends ChangeNotifier {
   final GetProducts getProductsUseCase;
   final AddProduct addProductUseCase;
   final DeleteProduct deleteProductUseCase;
+  final FavoritesService favoritesService;
 
   ProductsProvider({
     required this.getProductsUseCase,
     required this.addProductUseCase,
     required this.deleteProductUseCase,
+    required this.favoritesService,
   });
 
   bool _isLoading = false;
@@ -35,8 +38,11 @@ class ProductsProvider extends ChangeNotifier {
       (failure) {
         _error = 'Error al cargar los productos: ${failure.message}';
       },
-      (productsList) {
-        _products = productsList;
+      (productsList) async {
+        final favorites = await favoritesService.getFavorites();
+        _products = productsList.map((product) {
+          return product.copyWith(isFavorite: favorites.contains(product.id));
+        }).toList();
       },
     );
 
@@ -73,5 +79,20 @@ class ProductsProvider extends ChangeNotifier {
         }
     );
     notifyListeners();
+  }
+
+  Future<void> toggleFavorite(int productId) async {
+    final productIndex = _products.indexWhere((p) => p.id == productId);
+    if (productIndex != -1) {
+      final product = _products[productIndex];
+      _products[productIndex] = product.copyWith(isFavorite: !product.isFavorite);
+      notifyListeners();
+
+      await favoritesService.toggleFavorite(productId);
+    }
+  }
+
+  List<ProductEntity> get favoriteProducts {
+    return _products.where((product) => product.isFavorite).toList();
   }
 }

@@ -8,7 +8,6 @@ import '../models/product_model.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
   final ProductRemoteDataSource remoteDataSource;
-  // Podríamos tener un localDataSource aquí también para caché
 
   ProductRepositoryImpl({required this.remoteDataSource});
 
@@ -43,7 +42,7 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Either<Failure, void>> deleteProduct(int id) async {
     try {
       await remoteDataSource.deleteProduct(id);
-      return const Right(null); // Right(null) o Right(()) para indicar éxito
+      return const Right(null); 
     } on ServerException {
       return const Left(ServerFailure('Error al eliminar el producto.'));
     }

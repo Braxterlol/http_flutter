@@ -17,13 +17,11 @@ class ProductModel extends ProductEntity {
 factory ProductModel.fromJson(Map<String, dynamic> json) {
   return ProductModel(
     id: json['id'],
-    title: json['title'] ?? 'No Title', // Si el título es nulo, pone 'No Title'
-    description: json['description'] ?? '', // Si la descripción es nula, pone un string vacío
+    title: json['title'] ?? 'No Title', 
+    description: json['description'] ?? '', 
     
-    // La corrección principal está aquí:
     price: (json['price'] as num?)?.toDouble() ?? 0.0,
     
-    // También es buena idea poner un valor por defecto para la imagen:
     thumbnail: json['thumbnail'] ?? 'https://i.dummyjson.com/data/products/1/thumbnail.jpg',
     );
   }
